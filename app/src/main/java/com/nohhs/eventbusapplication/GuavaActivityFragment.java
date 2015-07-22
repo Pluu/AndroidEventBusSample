@@ -2,6 +2,7 @@ package com.nohhs.eventbusapplication;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,6 +14,7 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import com.google.common.eventbus.Subscribe;
 import com.nohhs.eventbusapplication.event.GuavaBusHolder;
+import com.nohhs.eventbusapplication.event.GuavaEventListener;
 import com.nohhs.eventbusapplication.event.ResponseEvent;
 import com.nohhs.eventbusapplication.event.ResponseFailEvent;
 import com.nohhs.eventbusapplication.network.GuavaTestNetwork;
@@ -22,8 +24,12 @@ import com.nohhs.eventbusapplication.network.GuavaTestNetwork;
  */
 public class GuavaActivityFragment extends Fragment {
 
+	private final String TAG = GuavaActivityFragment.class.getSimpleName();
+
 	@Bind(R.id.textView)
 	TextView textView;
+
+	private final GuavaEventListener listener = new GuavaEventListener();
 
 	public GuavaActivityFragment() {
 	}
@@ -40,10 +46,12 @@ public class GuavaActivityFragment extends Fragment {
 	public void onResume() {
 		super.onResume();
 		GuavaBusHolder.get().register(this);
-	}
+		GuavaBusHolder.get().register(listener);
+	};
 
 	@Override
 	public void onPause() {
+		GuavaBusHolder.get().unregister(listener);
 		GuavaBusHolder.get().unregister(this);
 		super.onPause();
 	}
@@ -64,6 +72,11 @@ public class GuavaActivityFragment extends Fragment {
 		GuavaBusHolder.get().post(new ResponseEvent("Local Message Send"));
 	}
 
+	@OnClick(R.id.button3)
+	public void clickLocalCallListener() {
+		GuavaBusHolder.get().post("300");
+	}
+
 	@Subscribe
 	public void responseNetwork(ResponseEvent result) {
 		textView.setText(result.getObj());
@@ -72,6 +85,13 @@ public class GuavaActivityFragment extends Fragment {
 	@Subscribe
 	public void responseFailNetwork(ResponseFailEvent result) {
 		Toast.makeText(getActivity(), result.getThrowable().getMessage(), Toast.LENGTH_SHORT)
+			 .show();
+	}
+
+	@Subscribe
+	public void responseString(String result) {
+		Log.d(TAG, result);
+		Toast.makeText(getActivity(), result, Toast.LENGTH_SHORT)
 			 .show();
 	}
 }

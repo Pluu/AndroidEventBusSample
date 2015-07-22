@@ -1,7 +1,7 @@
 <resources>
 	<string name="app_name">EventBus Sample</string>
 	<string name="hello_world">Hello world!</string>
-	<string name="title_activity_otto">OttoActivity</string>
-	<string name="title_activity_guava">GuavaActivity</string>
-	<string name="title_activity_event_bus">EventBusActivity</string>
+	<string name="title_activity_otto">Otto Sample</string>
+	<string name="title_activity_guava">Guava Sample</string>
+	<string name="title_activity_event_bus">EventBus Sample</string>
 </resources>

@@ -2,6 +2,7 @@ package com.nohhs.eventbusapplication;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,6 +13,7 @@ import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import com.nohhs.eventbusapplication.event.OttoBusHolder;
+import com.nohhs.eventbusapplication.event.OttoListener;
 import com.nohhs.eventbusapplication.event.ResponseEvent;
 import com.nohhs.eventbusapplication.event.ResponseFailEvent;
 import com.nohhs.eventbusapplication.network.OttoTestNetwork;
@@ -22,8 +24,12 @@ import com.squareup.otto.Subscribe;
  */
 public class OttoActivityFragment extends Fragment {
 
+	private final String TAG = OttoActivityFragment.class.getSimpleName();
+
 	@Bind(R.id.textView)
 	TextView textView;
+
+	private final OttoListener listener = new OttoListener();
 
 	public OttoActivityFragment() { }
 
@@ -39,11 +45,13 @@ public class OttoActivityFragment extends Fragment {
 	public void onResume() {
 		super.onResume();
 		OttoBusHolder.get().register(this);
+		OttoBusHolder.get().register(listener);
 	}
 
 	@Override
 	public void onPause() {
 		OttoBusHolder.get().unregister(this);
+		OttoBusHolder.get().unregister(listener);
 		super.onPause();
 	}
 
@@ -63,6 +71,11 @@ public class OttoActivityFragment extends Fragment {
 		OttoBusHolder.get().post(new ResponseEvent("Local Message Send"));
 	}
 
+	@OnClick(R.id.button3)
+	public void clickLocalCallListener() {
+		OttoBusHolder.get().post("100");
+	}
+
 	@Subscribe
 	public void responseNetwork(ResponseEvent result) {
 		textView.setText(result.getObj());
@@ -71,6 +84,13 @@ public class OttoActivityFragment extends Fragment {
 	@Subscribe
 	public void responseFailNetwork(ResponseFailEvent result) {
 		Toast.makeText(getActivity(), result.getThrowable().getMessage(), Toast.LENGTH_SHORT)
+			 .show();
+	}
+
+	@Subscribe
+	public void responseString(String result) {
+		Log.d(TAG, result);
+		Toast.makeText(getActivity(), result, Toast.LENGTH_SHORT)
 			 .show();
 	}
 

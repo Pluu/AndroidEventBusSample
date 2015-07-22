@@ -2,6 +2,7 @@ package com.nohhs.eventbusapplication;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,6 +12,7 @@ import android.widget.Toast;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import com.nohhs.eventbusapplication.event.EventBusListener;
 import com.nohhs.eventbusapplication.event.ResponseEvent;
 import com.nohhs.eventbusapplication.event.ResponseFailEvent;
 import com.nohhs.eventbusapplication.network.EventBusTestNetwork;
@@ -21,8 +23,12 @@ import de.greenrobot.event.EventBus;
  */
 public class EventBusActivityFragment extends Fragment {
 
+	private final String TAG = EventBusActivityFragment.class.getSimpleName();
+
 	@Bind(R.id.textView)
 	TextView textView;
+
+	private final EventBusListener listener = new EventBusListener();
 
 	public EventBusActivityFragment() { }
 
@@ -38,11 +44,13 @@ public class EventBusActivityFragment extends Fragment {
 	public void onResume() {
 		super.onResume();
 		EventBus.getDefault().register(this);
+		EventBus.getDefault().register(listener);
 	}
 
 	@Override
 	public void onPause() {
 		EventBus.getDefault().unregister(this);
+		EventBus.getDefault().unregister(listener);
 		super.onPause();
 	}
 
@@ -62,12 +70,23 @@ public class EventBusActivityFragment extends Fragment {
 		EventBus.getDefault().post(new ResponseEvent("Local Message Send"));
 	}
 
-	public void onEventMainThread(ResponseEvent result){
+	@OnClick(R.id.button3)
+	public void clickLocalCallListener() {
+		EventBus.getDefault().post("300");
+	}
+
+	public void onEventMainThread(ResponseEvent result) {
 		textView.setText(result.getObj());
 	}
 
-	public void onEventMainThread(ResponseFailEvent result){
+	public void onEventMainThread(ResponseFailEvent result) {
 		Toast.makeText(getActivity(), result.getThrowable().getMessage(), Toast.LENGTH_SHORT)
+			 .show();
+	}
+
+	public void onEventMainThread(String result) {
+		Log.d(TAG, result);
+		Toast.makeText(getActivity(), result, Toast.LENGTH_SHORT)
 			 .show();
 	}
 
